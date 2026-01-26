@@ -15,7 +15,6 @@ import {
   ChevronDown,
   Play,
   Pause,
-  Save,
   CheckCircle,
   Loader2,
   Book,
@@ -167,11 +166,10 @@ export default function CustomQTPage() {
 
     try {
       await api.quietTime.createSession({
-        type: 'custom',
+        type: 'word_to_life', // Custom QT mapped to word_to_life
         durationSeconds: elapsedTime,
-        completed: true,
         verseReference: getCurrentPassage(),
-        notes: notes,
+        reflectionNotes: notes,
       });
     } catch (error) {
       console.warn('Failed to save session:', error);

@@ -5,7 +5,6 @@ import { DashboardLayout } from '@/components/dashboard-layout';
 import { api } from '@/lib/api';
 import {
   Bell,
-  CheckCircle,
   Flame,
   Heart,
   MessageSquare,
@@ -14,9 +13,8 @@ import {
   Loader2,
   AlertCircle,
   Check,
-  Trash2,
 } from 'lucide-react';
-import type { Notification } from '@viaapp/shared';
+import type { Notification } from '@shared/types';
 
 const iconMap: Record<string, React.ElementType> = {
   streak_milestone: Flame,
@@ -55,7 +53,7 @@ export default function NotificationsPage() {
       } else if (result.error) {
         setError(result.error);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load notifications');
     }
     setLoading(false);
@@ -146,7 +144,7 @@ export default function NotificationsPage() {
               No notifications yet
             </h3>
             <p className="text-gray-500">
-              When you receive notifications, they'll appear here
+              When you receive notifications, they&apos;ll appear here
             </p>
           </div>
         ) : (

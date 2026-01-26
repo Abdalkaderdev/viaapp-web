@@ -1,4 +1,4 @@
-import { createApiClient, STORAGE_KEYS } from '@viaapp/shared';
+import { createApiClient, STORAGE_KEYS } from '@shared/index';
 
 // Token management for web
 async function getToken(): Promise<string | null> {

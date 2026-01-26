@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { User, UserStats } from '@viaapp/shared';
+import type { User, UserStats } from '@shared/types';
 
 interface AuthState {
   user: User | null;

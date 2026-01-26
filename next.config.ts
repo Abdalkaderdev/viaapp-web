@@ -1,8 +1,8 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  transpilePackages: ['@viaapp/shared'],
+  // Note: 'standalone' output requires symlink permissions on Windows
+  // Uncomment for Docker deployments: output: 'standalone',
   images: {
     remotePatterns: [
       {

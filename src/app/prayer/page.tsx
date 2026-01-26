@@ -3,15 +3,12 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { api } from '@/lib/api';
-import type { PrayerRequest } from '@viaapp/shared';
-import { PRAYER_CATEGORIES } from '@viaapp/shared';
+import type { PrayerRequest } from '@shared/types';
+import { PRAYER_CATEGORIES } from '@shared/constants';
 import {
   Heart,
   Plus,
   Check,
-  Clock,
-  Archive,
-  Filter,
   X,
   Loader2,
 } from 'lucide-react';
@@ -31,7 +28,8 @@ export default function PrayerPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchPrayers();
+    void fetchPrayers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   async function fetchPrayers() {

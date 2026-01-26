@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useRef, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from './api';
 import { useAuthStore } from './store';
-import type { User, LoginRequest, RegisterRequest } from '@viaapp/shared';
+import type { User, LoginRequest, RegisterRequest } from '@shared/types';
 
 interface AuthContextType {
   user: User | null;

@@ -7,7 +7,7 @@ import { useUIStore } from '@/lib/store';
 import { Sidebar } from './sidebar';
 import { ErrorBoundary } from './error-boundary';
 import { clsx } from 'clsx';
-import { Loader2, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import Image from 'next/image';
 
 interface DashboardLayoutProps {
@@ -17,7 +17,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
-  const { sidebarOpen, setSidebarOpen } = useUIStore();
+  const { sidebarOpen } = useUIStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {

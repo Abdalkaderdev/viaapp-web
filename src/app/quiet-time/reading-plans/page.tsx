@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { api } from '@/lib/api';
-import type { ReadingPlan } from '@viaapp/shared';
+import type { ReadingPlan } from '@shared/types';
 import {
   BookOpen,
   ArrowLeft,

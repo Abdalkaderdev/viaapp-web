@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { api } from '@/lib/api';
-import type { DisciplePartnership, PartnershipRecommendation, PartnershipStats, PartnershipMessage } from '@viaapp/shared';
+import type { DisciplePartnership, PartnershipRecommendation, PartnershipStats, PartnershipMessage } from '@shared/types';
 import {
   Users,
   Search,
@@ -409,7 +409,7 @@ export default function PartnerPage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  Track each other's spiritual growth
+                  Track each other&apos;s spiritual growth
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
@@ -436,7 +436,7 @@ export default function PartnerPage() {
                 </button>
               </div>
               <p className="text-gray-600 mb-4">
-                Enter your friend's email to send them an invitation to become
+                Enter your friend&apos;s email to send them an invitation to become
                 your disciple partner.
               </p>
               <input

@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth-provider';
 import { useUIStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import { clsx } from 'clsx';
-import type { UserStats } from '@viaapp/shared';
+import type { UserStats } from '@shared/types';
 import {
   Home,
   BookHeart,
@@ -149,7 +149,7 @@ export function Sidebar() {
         if (result.data) {
           setStats(result.data);
         }
-      } catch (err) {
+      } catch {
         // Silently fail - streak will show 0
       }
     }

@@ -14,9 +14,8 @@ import {
   CheckCircle,
   Loader2,
   AlertCircle,
-  X,
 } from 'lucide-react';
-import type { ReadingPlan, UserReadingProgress } from '@viaapp/shared';
+import type { ReadingPlan, UserReadingProgress } from '@shared/types';
 
 interface BibleBook {
   id: string;
@@ -93,7 +92,7 @@ export default function BiblePage() {
 
         if (plansResult.data) setPlans(plansResult.data);
         if (progressResult.data) setProgress(progressResult.data);
-      } catch (err) {
+      } catch {
         setError('Failed to load reading plans');
       }
       setLoading(false);

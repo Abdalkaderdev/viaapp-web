@@ -11,12 +11,11 @@ import {
   Calendar,
   CheckCircle,
   Loader2,
-  AlertCircle,
   LogOut,
   Plus,
   CheckCircle2,
 } from 'lucide-react';
-import type { UserChurch, Church as ChurchType } from '@viaapp/shared';
+import type { UserChurch, Church as ChurchType } from '@shared/types';
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -26,7 +25,7 @@ export default function ChurchPage() {
   const [searchResults, setSearchResults] = useState<ChurchType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [memberCount, setMemberCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
   const [selectedServiceDay, setSelectedServiceDay] = useState('Sunday');
@@ -64,7 +63,7 @@ export default function ChurchPage() {
           setEventCount(eventsResult.data.count || eventsResult.data.events?.length || 0);
         }
       }
-    } catch (err) {
+    } catch {
       // No church is okay
     }
     setLoading(false);
@@ -78,7 +77,7 @@ export default function ChurchPage() {
       if (!result.error) {
         setHasCheckedIn(true);
       }
-    } catch (err) {
+    } catch {
       setError('Check-in failed');
     }
     setCheckingIn(false);
@@ -92,7 +91,7 @@ export default function ChurchPage() {
       if (result.data) {
         setSearchResults(result.data);
       }
-    } catch (err) {
+    } catch {
       setError('Search failed');
     }
     setSearching(false);

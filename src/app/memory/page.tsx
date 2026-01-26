@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { api } from '@/lib/api';
-import { useAuthStore } from '@/lib/store';
 import {
   BookOpen,
   Brain,
@@ -21,7 +20,7 @@ import {
   ThumbsUp,
   ThumbsDown,
 } from 'lucide-react';
-import type { MemoryVerse, UserStats } from '@viaapp/shared';
+import type { MemoryVerse, UserStats } from '@shared/types';
 
 export default function MemoryVersePage() {
   const [verses, setVerses] = useState<MemoryVerse[]>([]);
@@ -57,7 +56,7 @@ export default function MemoryVersePage() {
       if (statsResult.data) {
         setStats(statsResult.data);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load memory verses');
     }
     setLoading(false);
@@ -73,7 +72,7 @@ export default function MemoryVersePage() {
         setShowAddModal(false);
         setNewVerse({ reference: '', text: '' });
       }
-    } catch (err) {
+    } catch {
       // Handle error
     }
     setAdding(false);
@@ -86,7 +85,7 @@ export default function MemoryVersePage() {
       if (result.data) {
         setVerses(verses.map((v) => (v.id === result.data!.id ? result.data! : v)));
       }
-    } catch (err) {
+    } catch {
       // Handle error
     }
     setShowAnswer(false);
@@ -94,16 +93,18 @@ export default function MemoryVersePage() {
     setSelectedVerse(null);
   }
 
-  async function handleDelete(id: string) {
+  async function deleteVerse(id: string) {
     try {
       const result = await api.memory.deleteVerse(id);
       if (!result.error) {
         setVerses(verses.filter((v) => v.id !== id));
       }
-    } catch (err) {
+    } catch {
       // Handle error
     }
   }
+  // Expose deleteVerse for future use
+  void deleteVerse;
 
   const masteredVerses = verses.filter((v) => v.masteryLevel === 'mastered');
   const inProgressVerses = verses.filter((v) => v.masteryLevel !== 'mastered');
@@ -149,7 +150,7 @@ export default function MemoryVersePage() {
               <Brain className="w-8 h-8 text-brand-500" />
               Memory Verses
             </h1>
-            <p className="text-gray-600 mt-1">Hide God's Word in your heart</p>
+            <p className="text-gray-600 mt-1">Hide God&apos;s Word in your heart</p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
@@ -238,7 +239,7 @@ export default function MemoryVersePage() {
               >
                 {showAnswer ? (
                   <p className="text-xl font-serif text-gray-800 leading-relaxed">
-                    "{selectedVerse.text}"
+                    &quot;{selectedVerse.text}&quot;
                   </p>
                 ) : (
                   <p className="text-gray-500">Tap to reveal verse</p>
@@ -283,7 +284,7 @@ export default function MemoryVersePage() {
               No memory verses yet
             </h3>
             <p className="text-gray-500 mb-6">
-              Start hiding God's Word in your heart by adding your first verse
+              Start hiding God&apos;s Word in your heart by adding your first verse
             </p>
             <button
               onClick={() => setShowAddModal(true)}

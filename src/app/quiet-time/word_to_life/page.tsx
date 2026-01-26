@@ -137,7 +137,7 @@ export default function WordToLifePage() {
       <DashboardLayout>
         <div className="max-w-3xl mx-auto flex flex-col items-center justify-center min-h-[400px]">
           <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
-          <p className="text-gray-500 mt-4">Loading today's reading...</p>
+          <p className="text-gray-500 mt-4">Loading today&apos;s reading...</p>
         </div>
       </DashboardLayout>
     );
@@ -147,7 +147,7 @@ export default function WordToLifePage() {
     return (
       <DashboardLayout>
         <div className="max-w-3xl mx-auto text-center py-12">
-          <p className="text-gray-500">{error || 'Unable to load today\'s reading.'}</p>
+          <p className="text-gray-500">{error || "Unable to load today's reading."}</p>
           <Link href="/quiet-time" className="text-brand-600 hover:text-brand-700 mt-4 inline-block">
             Go back
           </Link>
@@ -231,7 +231,7 @@ export default function WordToLifePage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
           <div className="text-center mb-6">
             <span className="inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-2">
-              Today's Reading
+              Today&apos;s Reading
             </span>
             <h2 className="text-xl font-bold text-gray-900">{todaysReading.title}</h2>
             <p className="text-brand-600 font-medium">{todaysReading.reference}</p>

@@ -17,7 +17,6 @@ import {
   ChevronRight,
   CheckCircle,
   Loader2,
-  Send,
 } from 'lucide-react';
 
 interface DevotionalStep {
@@ -91,7 +90,7 @@ const DEFAULT_DEVOTIONAL: GuidedDevotional = {
   ],
 };
 
-const stepIcons: Record<string, any> = {
+const stepIcons: Record<string, React.ElementType> = {
   scripture: BookOpen,
   reflection: Lightbulb,
   prayer: Heart,
@@ -121,16 +120,25 @@ export default function GuidedQTPage() {
     setLoading(true);
     try {
       // Try to fetch daily reading from API
-      const response = await api.dailyReadings.getToday();
+      const response = await api.quietTime.getDailyReading();
       if (response.data) {
         const reading = response.data;
+        // Convert verses array to text
+        const scriptureText = reading.verses
+          .map((v) => `${v.num}. ${v.text}`)
+          .join(' ');
+        // Build reflection content from questions
+        const reflectionContent = reading.reflectionQuestions?.length
+          ? reading.reflectionQuestions.join('\n\n')
+          : 'Take time to think about what this passage means and how it applies to your life.';
+
         setDevotional({
-          id: reading.id || 'daily-' + Date.now(),
+          id: 'daily-' + Date.now(),
           title: reading.title || 'Daily Devotional',
           theme: reading.title || 'Spending Time with God',
           scripture: {
             reference: reading.reference,
-            text: reading.scriptureText || reading.text || '',
+            text: scriptureText,
           },
           steps: [
             {
@@ -152,7 +160,7 @@ export default function GuidedQTPage() {
               id: 'reflect',
               title: 'Reflect & Meditate',
               type: 'reflection',
-              content: reading.content || 'Take time to think about what this passage means and how it applies to your life.',
+              content: reflectionContent,
               prompt: 'What is God speaking to you through this passage?',
               duration: 5,
             },
@@ -215,9 +223,8 @@ export default function GuidedQTPage() {
     try {
       // Save session via API
       await api.quietTime.createSession({
-        type: 'guided',
+        type: 'word_to_life', // Guided QT mapped to word_to_life
         durationSeconds: timeSpentSeconds,
-        completed: true,
         verseReference: devotional.scripture.reference,
       });
     } catch (error) {

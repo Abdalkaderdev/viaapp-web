@@ -77,7 +77,7 @@ export default function WordToHeartPage() {
     return (
       <DashboardLayout>
         <div className="max-w-3xl mx-auto text-center py-12">
-          <p className="text-gray-500">Unable to load today's verse. Please try again.</p>
+          <p className="text-gray-500">Unable to load today&apos;s verse. Please try again.</p>
           <Link href="/quiet-time" className="text-brand-600 hover:text-brand-700 mt-4 inline-block">
             Go back
           </Link>
@@ -161,7 +161,7 @@ export default function WordToHeartPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
           <div className="text-center mb-8">
             <span className="inline-block px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-medium mb-4">
-              Today's Memory Verse
+              Today&apos;s Memory Verse
             </span>
             <p className="text-lg text-brand-600 font-medium mb-2">
               {memoryVerse.reference}
@@ -176,7 +176,7 @@ export default function WordToHeartPage() {
           >
             <BookOpen className="w-8 h-8 text-rose-300 absolute top-4 right-4" />
             <p className="text-2xl font-serif text-gray-800 leading-relaxed text-center">
-              "{memoryVerse.text}"
+              &quot;{memoryVerse.text}&quot;
             </p>
             <p className="text-sm text-gray-500 text-center mt-4">
               — {memoryVerse.reference} ({memoryVerse.translation})

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { useAuth } from '@/lib/auth-provider';
 import { api } from '@/lib/api';
-import type { UserStats, QuietTimeSession, PrayerRequest, UserChurch } from '@viaapp/shared';
+import type { UserStats, QuietTimeSession, PrayerRequest, UserChurch } from '@shared/types';
 import {
   Sun,
   BookOpen,
@@ -267,7 +267,7 @@ interface RecentActivity {
 }
 
 export default function DashboardPage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [prayerCount, setPrayerCount] = useState(0);
@@ -290,7 +290,7 @@ export default function DashboardPage() {
       if (!result.error) {
         setHasCheckedIn(true);
       }
-    } catch (err) {
+    } catch {
       // Handle error
     }
     setCheckingIn(false);

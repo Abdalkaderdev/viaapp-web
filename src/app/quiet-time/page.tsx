@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { api } from '@/lib/api';
-import type { QuietTimeSession, ReadingPlan } from '@viaapp/shared';
+import type { QuietTimeSession, ReadingPlan } from '@shared/types';
 import {
   Sun,
   Heart,
@@ -145,7 +145,7 @@ function QuietTimeContent() {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Word to Heart</h3>
             <p className="text-gray-600 mb-4">
-              Memorize and meditate on Scripture, hiding God's Word in your heart.
+              Memorize and meditate on Scripture, hiding God&apos;s Word in your heart.
             </p>
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span className="flex items-center gap-1">
