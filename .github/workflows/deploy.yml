@@ -42,6 +42,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 30m
           script: |
             docker pull ghcr.io/abdalkaderdev/viaapp-web:latest
             cd /root/via-new && docker compose up -d web
