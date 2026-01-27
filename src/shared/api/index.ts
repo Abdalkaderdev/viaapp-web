@@ -33,6 +33,7 @@ interface ApiClientConfig {
   setTokens: TokenSetter;
   clearTokens: TokenClearer;
   onUnauthorized?: () => void;
+  getHeaders?: () => Record<string, string>;
 }
 
 export function createApiClient(config: ApiClientConfig) {
@@ -44,8 +45,11 @@ export function createApiClient(config: ApiClientConfig) {
   ): Promise<ApiResponse<T>> {
     const token = await config.getToken();
 
+    const customHeaders = config.getHeaders ? config.getHeaders() : {};
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
+      ...customHeaders,
       ...options.headers,
     };
 
