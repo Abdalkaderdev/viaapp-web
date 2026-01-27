@@ -23,6 +23,7 @@ import {
   Heart,
   Church,
   Brain,
+  MessageSquare,
 } from 'lucide-react';
 
 // Main 5 tabs matching mobile app
@@ -38,6 +39,7 @@ const moreNavItems = [
   { href: '/prayer', label: 'Prayer', icon: Heart },
   { href: '/memory', label: 'Memory Verses', icon: Brain },
   { href: '/church', label: 'Church', icon: Church },
+  { href: '/community', label: 'Community', icon: MessageSquare },
 ];
 
 const accountNavItems = [
@@ -64,7 +66,8 @@ function NavSection({
         </p>
       )}
       {items.map((item) => {
-        const isActive = pathname === item.href;
+        // Check if pathname matches exactly or starts with the href (for nested routes)
+        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
         return (
           <Link
             key={item.href}

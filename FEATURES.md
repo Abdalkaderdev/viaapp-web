@@ -174,11 +174,13 @@
 ### Community
 | Feature | File | Status | Notes |
 |---------|------|--------|-------|
-| Community Index | `src/app/community/page.tsx` | ⬜ | Community home |
-| Discussions | `src/app/community/discussions/page.tsx` | ⬜ | Forum |
+| Community Index | `src/app/community/page.tsx` | ✅ | Community home/feed |
+| Discussions | `src/app/community/discussions/page.tsx` | ✅ | Forum/discussion threads |
+| Groups | `src/app/community/groups/page.tsx` | ✅ | Browse/join groups |
+| Group Detail | `src/app/community/groups/[id]/page.tsx` | ✅ | Individual group page |
+| Events | `src/app/community/events/page.tsx` | ✅ | Community events |
 | Prayer Wall | `src/app/community/prayer-wall/page.tsx` | ⬜ | Public prayers |
 | Testimonies | `src/app/community/testimonies/page.tsx` | ⬜ | Share stories |
-| Groups | `src/app/community/groups/page.tsx` | ⬜ | Study groups |
 
 ### Progress
 | Feature | File | Status | Notes |
@@ -286,13 +288,13 @@ NEXT_PUBLIC_API_URL=https://api.viaapp.com/api
 | Notifications | 1 | ✅ Complete |
 | Studies | 17 | ⬜ Missing |
 | Reading Plans | 3 | ⬜ Missing |
-| Community | 5 | ⬜ Missing |
+| Community | 7 | ✅ 5 Complete (2 pending) |
 | Progress | 4 | ⬜ Missing |
 | Profile | 2 | ⬜ Missing |
 | Other | 5 | ⬜ Missing |
 
-**Present**: 17 pages
-**Missing**: 36 pages
+**Present**: 22 pages
+**Missing**: 33 pages
 
 ---
 
