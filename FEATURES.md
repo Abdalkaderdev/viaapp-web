@@ -159,17 +159,18 @@
 ### Studies
 | Feature | File | Status | Notes |
 |---------|------|--------|-------|
-| Studies Index | `src/app/study/page.tsx` | ⬜ | Study home |
-| New Believer | `src/app/study/new-believer/page.tsx` | ⬜ | Basics course |
-| Lesson View | `src/app/study/lesson/[id]/page.tsx` | ⬜ | Lesson viewer |
-| Categories | `src/app/study/categories/` | ⬜ | 15 categories |
+| Studies Index | `src/app/study/page.tsx` | ✅ | Study home (browse) |
+| Study Detail | `src/app/study/[id]/page.tsx` | ✅ | Study details |
+| Lesson View | `src/app/study/[id]/lesson/[lessonId]/page.tsx` | ✅ | Lesson viewer |
+| Enrolled Studies | `src/app/study/enrolled/page.tsx` | ✅ | User's studies |
+| Study Progress | `src/app/study/progress/page.tsx` | ✅ | Progress tracking |
 
 ### Reading Plans
 | Feature | File | Status | Notes |
 |---------|------|--------|-------|
-| Plans List | `src/app/reading/page.tsx` | ⬜ | Browse plans |
-| Active Plan | `src/app/reading/active/page.tsx` | ⬜ | Current plan |
-| Create Plan | `src/app/reading/create/page.tsx` | ⬜ | Custom plans |
+| Plans List | `src/app/reading-plans/page.tsx` | ✅ | Browse plans |
+| Plan Detail | `src/app/reading-plans/[id]/page.tsx` | ✅ | Plan details |
+| Active Plans | `src/app/reading-plans/active/page.tsx` | ✅ | Current plans |
 
 ### Community
 | Feature | File | Status | Notes |
@@ -185,16 +186,17 @@
 ### Progress
 | Feature | File | Status | Notes |
 |---------|------|--------|-------|
-| Progress | `src/app/progress/page.tsx` | ⬜ | Progress overview |
-| Analytics | `src/app/analytics/page.tsx` | ⬜ | Detailed stats |
-| Certificates | `src/app/certificates/page.tsx` | ⬜ | Earned certs |
-| Badges | `src/app/badges/page.tsx` | ⬜ | Achievement badges |
+| Progress | `src/app/progress/page.tsx` | ✅ | Progress overview |
+| Analytics | `src/app/progress/analytics/page.tsx` | ✅ | Detailed stats |
+| Certificates | `src/app/progress/certificates/page.tsx` | ✅ | Earned certs |
+| Badges | `src/app/progress/badges/page.tsx` | ✅ | Achievement badges |
 
 ### Profile
 | Feature | File | Status | Notes |
 |---------|------|--------|-------|
-| Profile | `src/app/profile/page.tsx` | ⬜ | User profile |
-| Edit Profile | `src/app/profile/edit/page.tsx` | ⬜ | Edit profile |
+| Profile | `src/app/profile/page.tsx` | ✅ | User profile |
+| Notifications Settings | `src/app/profile/notifications/page.tsx` | ✅ | Notification prefs |
+| Privacy Settings | `src/app/profile/privacy/page.tsx` | ✅ | Privacy controls |
 
 ### Other
 | Feature | File | Status | Notes |
@@ -286,23 +288,20 @@ NEXT_PUBLIC_API_URL=https://api.viaapp.com/api
 | Partner | 1 | ✅ Complete |
 | Settings | 1 | ✅ Complete |
 | Notifications | 1 | ✅ Complete |
-| Studies | 17 | ⬜ Missing |
-| Reading Plans | 3 | ⬜ Missing |
-| Community | 7 | ✅ 5 Complete (2 pending) |
-| Progress | 4 | ⬜ Missing |
-| Profile | 2 | ⬜ Missing |
-| Other | 5 | ⬜ Missing |
+| Studies | 5 | ✅ Complete |
+| Reading Plans | 3 | ✅ Complete |
+| Community | 7 | ⚠️ 5 Complete (prayer-wall, testimonies pending) |
+| Progress | 4 | ✅ Complete |
+| Profile | 3 | ✅ Complete |
+| Other | 5 | ⬜ Missing (search, bookmarks, sermons, help, gospel) |
 
-**Present**: 22 pages
-**Missing**: 33 pages
+**Present**: 39 pages
+**Missing**: 8 pages
 
 ---
 
 ## Priority Order
 
-1. **HIGH**: Studies pages (17 categories)
-2. **HIGH**: Progress/Analytics
-3. **MEDIUM**: Community features
-4. **MEDIUM**: Reading Plans pages
-5. **MEDIUM**: Profile pages
-6. **LOW**: Search, Bookmarks, Help
+1. **HIGH**: Forgot password page
+2. **MEDIUM**: Prayer wall, testimonies pages
+3. **LOW**: Search, bookmarks, sermons, help, gospel pages
