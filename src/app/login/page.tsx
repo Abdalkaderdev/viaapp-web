@@ -130,8 +130,8 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-8">
-          <Link href="https://viaapp.com" className="hover:text-teal-600">
-            Back to ViaApp.com
+          <Link href="/" className="hover:text-teal-600">
+            ← Back to Home
           </Link>
         </p>
       </div>
