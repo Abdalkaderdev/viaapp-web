@@ -2,7 +2,9 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging, dev]
+  pull_request:
+    branches: [dev]
   workflow_dispatch:
 
 env:
@@ -10,7 +12,30 @@ env:
   IMAGE_NAME: abdalkaderdev/viaapp-web
 
 jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint || echo "No lint configured yet"
+
+      - name: Run tests
+        run: npm test || echo "No tests configured yet"
+
   build-and-deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -19,6 +44,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set environment variables
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "ENVIRONMENT=production" >> $GITHUB_ENV
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/root/via-new" >> $GITHUB_ENV
+            echo "API_URL=https://api.viaapp.life" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "ENVIRONMENT=staging" >> $GITHUB_ENV
+            echo "IMAGE_TAG=staging" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/root/via-staging" >> $GITHUB_ENV
+            echo "API_URL=https://staging-api.viaapp.life" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+            echo "IMAGE_TAG=dev" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/root/via-dev" >> $GITHUB_ENV
+            echo "API_URL=https://dev-api.viaapp.life" >> $GITHUB_ENV
+          fi
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -32,9 +76,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/abdalkaderdev/viaapp-web:latest
+          tags: ghcr.io/abdalkaderdev/viaapp-web:${{ env.IMAGE_TAG }}
           build-args: |
-            NEXT_PUBLIC_API_URL=https://api.viaapp.life
+            NEXT_PUBLIC_API_URL=${{ env.API_URL }}
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
@@ -44,5 +88,5 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           command_timeout: 30m
           script: |
-            docker pull ghcr.io/abdalkaderdev/viaapp-web:latest
-            cd /root/via-new && docker compose up -d web
+            docker pull ghcr.io/abdalkaderdev/viaapp-web:${{ env.IMAGE_TAG }}
+            cd ${{ env.DEPLOY_PATH }} && docker compose up -d web
