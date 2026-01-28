@@ -20,10 +20,14 @@ import {
   X,
   ThumbsUp,
   ThumbsDown,
+  Trash2,
 } from 'lucide-react';
 import type { MemoryVerse, UserStats } from '@shared/types';
+import { useToast } from '@/components/ui/toast';
+import { VerseCardSkeleton, StatCardSkeleton } from '@/components/ui/skeleton';
 
 export default function MemoryVersePage() {
+  const { success, error: showError } = useToast();
   const [verses, setVerses] = useState<MemoryVerse[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +38,7 @@ export default function MemoryVersePage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newVerse, setNewVerse] = useState({ reference: '', text: '' });
   const [adding, setAdding] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -72,9 +77,12 @@ export default function MemoryVersePage() {
         setVerses([result.data, ...verses]);
         setShowAddModal(false);
         setNewVerse({ reference: '', text: '' });
+        success('Verse added to your memory list');
+      } else if (result.error) {
+        showError('Failed to add verse. Please try again.');
       }
     } catch {
-      // Handle error
+      showError('Failed to add verse. Please try again.');
     }
     setAdding(false);
   }
@@ -85,27 +93,36 @@ export default function MemoryVersePage() {
       const result = await api.memory.reviewVerse(selectedVerse.id, correct);
       if (result.data) {
         setVerses(verses.map((v) => (v.id === result.data!.id ? result.data! : v)));
+        if (correct) {
+          success('Great job! Keep it up!');
+        }
+      } else {
+        showError('Failed to save review. Please try again.');
       }
     } catch {
-      // Handle error
+      showError('Failed to save review. Please try again.');
     }
     setShowAnswer(false);
     setPracticeMode(false);
     setSelectedVerse(null);
   }
 
-  async function deleteVerse(id: string) {
+  async function deleteVerse(id: string, e?: React.MouseEvent) {
+    e?.stopPropagation();
+    setDeletingId(id);
     try {
       const result = await api.memory.deleteVerse(id);
       if (!result.error) {
         setVerses(verses.filter((v) => v.id !== id));
+        success('Verse removed');
+      } else {
+        showError('Failed to delete verse. Please try again.');
       }
     } catch {
-      // Handle error
+      showError('Failed to delete verse. Please try again.');
     }
+    setDeletingId(null);
   }
-  // Expose deleteVerse for future use
-  void deleteVerse;
 
   const masteredVerses = verses.filter((v) => v.masteryLevel === 'mastered');
   const inProgressVerses = verses.filter((v) => v.masteryLevel !== 'mastered');
@@ -134,8 +151,26 @@ export default function MemoryVersePage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+        <div className="max-w-4xl mx-auto" role="status" aria-label="Loading memory verses">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2" />
+              <div className="h-4 w-64 bg-gray-100 rounded animate-pulse" />
+            </div>
+            <div className="h-10 w-28 bg-gray-200 rounded-xl animate-pulse" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </div>
+          <div className="space-y-3">
+            <VerseCardSkeleton />
+            <VerseCardSkeleton />
+            <VerseCardSkeleton />
+          </div>
+          <span className="sr-only">Loading memory verses...</span>
         </div>
       </DashboardLayout>
     );
@@ -341,7 +376,21 @@ export default function MemoryVersePage() {
                               </span>
                             </div>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400 ml-4" />
+                          <div className="flex items-center gap-2 ml-4">
+                            <button
+                              onClick={(e) => deleteVerse(verse.id, e)}
+                              disabled={deletingId === verse.id}
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                              aria-label={`Delete ${verse.reference}`}
+                            >
+                              {deletingId === verse.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" aria-hidden="true" />
+                              )}
+                            </button>
+                            <ChevronRight className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                          </div>
                         </div>
                       </div>
                     );
@@ -379,7 +428,21 @@ export default function MemoryVersePage() {
                             {verse.text}
                           </p>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400 ml-4" />
+                        <div className="flex items-center gap-2 ml-4">
+                          <button
+                            onClick={(e) => deleteVerse(verse.id, e)}
+                            disabled={deletingId === verse.id}
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            aria-label={`Delete ${verse.reference}`}
+                          >
+                            {deletingId === verse.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" aria-hidden="true" />
+                            )}
+                          </button>
+                          <ChevronRight className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                        </div>
                       </div>
                     </div>
                   ))}

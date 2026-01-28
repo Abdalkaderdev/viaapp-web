@@ -12,10 +12,14 @@ import {
   Check,
   X,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useToast } from '@/components/ui/toast';
+import { PrayerCardSkeleton } from '@/components/ui/skeleton';
 
 export default function PrayerPage() {
+  const { success, error: showError } = useToast();
   const [prayers, setPrayers] = useState<PrayerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewForm, setShowNewForm] = useState(false);
@@ -27,6 +31,7 @@ export default function PrayerPage() {
     visibility: 'private',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     void fetchPrayers();
@@ -35,10 +40,16 @@ export default function PrayerPage() {
 
   async function fetchPrayers() {
     setLoading(true);
-    const params = filter !== 'all' ? { status: filter } : {};
-    const result = await api.prayer.getRequests(params);
-    if (result.data) {
-      setPrayers(result.data.data);
+    try {
+      const params = filter !== 'all' ? { status: filter } : {};
+      const result = await api.prayer.getRequests(params);
+      if (result.data) {
+        setPrayers(result.data.data);
+      } else if (result.error) {
+        showError('Failed to load prayers. Please try again.');
+      }
+    } catch {
+      showError('Failed to load prayers. Please try again.');
     }
     setLoading(false);
   }
@@ -47,21 +58,51 @@ export default function PrayerPage() {
     e.preventDefault();
     setSubmitting(true);
 
-    const result = await api.prayer.createRequest(newPrayer);
-    if (result.data) {
-      setPrayers([result.data, ...prayers]);
-      setShowNewForm(false);
-      setNewPrayer({ title: '', description: '', category: 'personal', visibility: 'private' });
+    try {
+      const result = await api.prayer.createRequest(newPrayer);
+      if (result.data) {
+        setPrayers([result.data, ...prayers]);
+        setShowNewForm(false);
+        setNewPrayer({ title: '', description: '', category: 'personal', visibility: 'private' });
+        success('Prayer request added');
+      } else if (result.error) {
+        showError('Failed to add prayer. Please try again.');
+      }
+    } catch {
+      showError('Failed to add prayer. Please try again.');
     }
 
     setSubmitting(false);
   }
 
   async function markAnswered(id: string) {
-    const result = await api.prayer.markAnswered(id);
-    if (result.data) {
-      setPrayers(prayers.map(p => p.id === id ? result.data! : p));
+    try {
+      const result = await api.prayer.markAnswered(id);
+      if (result.data) {
+        setPrayers(prayers.map(p => p.id === id ? result.data! : p));
+        success('Praise God! Prayer marked as answered');
+      } else if (result.error) {
+        showError('Failed to update prayer. Please try again.');
+      }
+    } catch {
+      showError('Failed to update prayer. Please try again.');
     }
+  }
+
+  async function handleDelete(id: string) {
+    setDeletingId(id);
+    try {
+      const result = await api.prayer.deleteRequest(id);
+      if (!result.error) {
+        setPrayers(prayers.filter(p => p.id !== id));
+        success('Prayer request removed');
+      } else {
+        showError('Failed to delete prayer. Please try again.');
+      }
+    } catch {
+      showError('Failed to delete prayer. Please try again.');
+    }
+    setDeletingId(null);
   }
 
   return (
@@ -182,8 +223,11 @@ export default function PrayerPage() {
 
         {/* Prayer List */}
         {loading ? (
-          <div className="text-center py-12">
-            <Loader2 className="w-8 h-8 text-brand-600 animate-spin mx-auto" />
+          <div className="space-y-4" role="status" aria-label="Loading prayers">
+            <PrayerCardSkeleton />
+            <PrayerCardSkeleton />
+            <PrayerCardSkeleton />
+            <span className="sr-only">Loading prayers...</span>
           </div>
         ) : prayers.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 border border-gray-200 text-center">
@@ -228,15 +272,29 @@ export default function PrayerPage() {
                       <span>{new Date(prayer.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  {prayer.status === 'active' && (
+                  <div className="flex items-center gap-1">
+                    {prayer.status === 'active' && (
+                      <button
+                        onClick={() => markAnswered(prayer.id)}
+                        className="text-gray-400 hover:text-green-600 p-2 rounded-lg hover:bg-green-50 transition-colors"
+                        aria-label={`Mark "${prayer.title}" as answered`}
+                      >
+                        <Check className="w-5 h-5" aria-hidden="true" />
+                      </button>
+                    )}
                     <button
-                      onClick={() => markAnswered(prayer.id)}
-                      className="text-gray-400 hover:text-green-600 p-2"
-                      title="Mark as answered"
+                      onClick={() => handleDelete(prayer.id)}
+                      disabled={deletingId === prayer.id}
+                      className="text-gray-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                      aria-label={`Delete "${prayer.title}"`}
                     >
-                      <Check className="w-5 h-5" />
+                      {deletingId === prayer.id ? (
+                        <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Trash2 className="w-5 h-5" aria-hidden="true" />
+                      )}
                     </button>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}

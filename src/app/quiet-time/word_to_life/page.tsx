@@ -17,7 +17,9 @@ import {
   MessageSquare,
   Loader2,
   Sparkles,
+  AlertCircle,
 } from 'lucide-react';
+import { useToast } from '@/components/ui/toast';
 
 // Reading plan with popular passages
 const READING_PASSAGES = [
@@ -54,6 +56,7 @@ const steps = [
 
 export default function WordToLifePage() {
   const router = useRouter();
+  const { success, error: showError } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [journalEntry, setJournalEntry] = useState('');
   const [sessionStartTime] = useState(() => Date.now());
@@ -123,14 +126,25 @@ export default function WordToLifePage() {
     setIsSaving(true);
     const durationSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
 
-    await api.quietTime.createSession({
-      type: 'word_to_life',
-      durationSeconds,
-      verseReference: todaysReading?.reference || 'Daily Reading',
-      reflectionNotes: journalEntry || undefined,
-    });
+    try {
+      const result = await api.quietTime.createSession({
+        type: 'word_to_life',
+        durationSeconds,
+        verseReference: todaysReading?.reference || 'Daily Reading',
+        reflectionNotes: journalEntry || undefined,
+      });
 
-    router.push('/quiet-time?completed=true');
+      if (result.error) {
+        showError('Failed to save session. Please try again.');
+        setIsSaving(false);
+        return;
+      }
+
+      router.push('/quiet-time?completed=true');
+    } catch {
+      showError('Failed to save session. Please try again.');
+      setIsSaving(false);
+    }
   }
 
   if (loading) {

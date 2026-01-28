@@ -20,8 +20,11 @@ import {
   Loader2,
   AlertCircle,
 } from 'lucide-react';
+import { useToast } from '@/components/ui/toast';
+import { CardSkeleton, StatCardSkeleton } from '@/components/ui/skeleton';
 
 export default function PartnerPage() {
+  const { success, error: showError } = useToast();
   const [activePartnership, setActivePartnership] = useState<DisciplePartnership | null>(null);
   const [pendingRequests, setPendingRequests] = useState<DisciplePartnership[]>([]);
   const [recommendations, setRecommendations] = useState<PartnershipRecommendation[]>([]);
@@ -78,26 +81,48 @@ export default function PartnerPage() {
 
   async function handleAcceptRequest(partnershipId: string) {
     setActionLoading(partnershipId);
-    const result = await api.partnerships.acceptRequest(partnershipId);
-    if (result.data) {
-      setActivePartnership(result.data);
-      setPendingRequests((prev) => prev.filter((r) => r.id !== partnershipId));
+    try {
+      const result = await api.partnerships.acceptRequest(partnershipId);
+      if (result.data) {
+        setActivePartnership(result.data);
+        setPendingRequests((prev) => prev.filter((r) => r.id !== partnershipId));
+        success('Partnership request accepted!');
+      } else if (result.error) {
+        showError('Failed to accept request. Please try again.');
+      }
+    } catch {
+      showError('Failed to accept request. Please try again.');
     }
     setActionLoading(null);
   }
 
   async function handleRejectRequest(partnershipId: string) {
     setActionLoading(partnershipId);
-    await api.partnerships.rejectRequest(partnershipId);
-    setPendingRequests((prev) => prev.filter((r) => r.id !== partnershipId));
+    try {
+      const result = await api.partnerships.rejectRequest(partnershipId);
+      if (!result.error) {
+        setPendingRequests((prev) => prev.filter((r) => r.id !== partnershipId));
+      } else {
+        showError('Failed to decline request. Please try again.');
+      }
+    } catch {
+      showError('Failed to decline request. Please try again.');
+    }
     setActionLoading(null);
   }
 
   async function handleConnect(partnerId: string) {
     setActionLoading(partnerId);
-    const result = await api.partnerships.sendRequest(partnerId);
-    if (result.data) {
-      setRecommendations((prev) => prev.filter((r) => r.id !== partnerId));
+    try {
+      const result = await api.partnerships.sendRequest(partnerId);
+      if (result.data) {
+        setRecommendations((prev) => prev.filter((r) => r.id !== partnerId));
+        success('Connection request sent!');
+      } else if (result.error) {
+        showError('Failed to send request. Please try again.');
+      }
+    } catch {
+      showError('Failed to send request. Please try again.');
     }
     setActionLoading(null);
   }
@@ -128,14 +153,20 @@ export default function PartnerPage() {
     if (!activePartnership || !newMessage.trim()) return;
     setSendingMessage(true);
 
-    const result = await api.partnerships.sendMessage(activePartnership.id, newMessage.trim());
-    if (result.data) {
-      setMessages(prev => [...prev, result.data!]);
-      setNewMessage('');
-      // Scroll to bottom
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+    try {
+      const result = await api.partnerships.sendMessage(activePartnership.id, newMessage.trim());
+      if (result.data) {
+        setMessages(prev => [...prev, result.data!]);
+        setNewMessage('');
+        // Scroll to bottom
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else if (result.error) {
+        showError('Failed to send message. Please try again.');
+      }
+    } catch {
+      showError('Failed to send message. Please try again.');
     }
     setSendingMessage(false);
   }
@@ -155,8 +186,23 @@ export default function PartnerPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="max-w-4xl mx-auto flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+        <div className="max-w-4xl mx-auto" role="status" aria-label="Loading partnership data">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2" />
+              <div className="h-4 w-64 bg-gray-100 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-6">
+            <CardSkeleton />
+            <CardSkeleton />
+            <div className="grid grid-cols-3 gap-4">
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </div>
+          </div>
+          <span className="sr-only">Loading partnership data...</span>
         </div>
       </DashboardLayout>
     );

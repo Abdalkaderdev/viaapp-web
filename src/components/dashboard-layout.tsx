@@ -33,7 +33,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50" role="status" aria-label="Loading">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-4">
             <Image
@@ -44,10 +44,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               className="rounded-xl"
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+              <div className="w-20 h-20 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" aria-hidden="true" />
             </div>
           </div>
-          <p className="text-gray-600">Loading your dashboard...</p>
+          <p className="text-gray-600" aria-live="polite">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -77,9 +77,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
-            aria-label="Toggle menu"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileMenuOpen}
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           </button>
         </header>
 
@@ -101,6 +102,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content */}
         <main
+          id="main-content"
+          role="main"
+          aria-label="Main content"
           className={clsx(
             'transition-all duration-300 min-h-screen',
             'pt-16 lg:pt-0', // Account for mobile header

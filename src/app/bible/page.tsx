@@ -15,8 +15,13 @@ import {
   CheckCircle,
   Loader2,
   AlertCircle,
+  Copy,
+  Share2,
 } from 'lucide-react';
 import type { ReadingPlan, UserReadingProgress } from '@shared/types';
+import { useToast } from '@/components/ui/toast';
+import { BookButtonSkeleton, ReadingPlanSkeleton } from '@/components/ui/skeleton';
+import { getCached, setCache, CACHE_KEYS } from '@/lib/cache';
 
 interface BibleBook {
   id: string;
@@ -43,6 +48,7 @@ interface BibleVerse {
 }
 
 export default function BiblePage() {
+  const { success, error: showError } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'books' | 'plans'>('books');
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
@@ -65,21 +71,41 @@ export default function BiblePage() {
   useEffect(() => {
     async function fetchBibleData() {
       setBooksLoading(true);
+
+      // Try to load from cache first
+      const cachedBooks = getCached<BibleBook[]>(CACHE_KEYS.BIBLE_BOOKS);
+      const cachedTranslations = getCached<BibleTranslation[]>(CACHE_KEYS.BIBLE_TRANSLATIONS);
+
+      if (cachedBooks && cachedTranslations) {
+        setBooks(cachedBooks);
+        setTranslations(cachedTranslations);
+        setBooksLoading(false);
+        return;
+      }
+
       try {
         const [booksResult, translationsResult] = await Promise.all([
           api.bible.getBooks(),
           api.bible.getTranslations(),
         ]);
 
-        if (booksResult.data) setBooks(booksResult.data);
-        if (translationsResult.data) setTranslations(translationsResult.data);
-      } catch (err) {
-        console.error('Failed to load Bible data:', err);
+        if (booksResult.data) {
+          setBooks(booksResult.data);
+          // Cache for 7 days - Bible books don't change
+          setCache(CACHE_KEYS.BIBLE_BOOKS, booksResult.data, 7 * 24 * 60 * 60 * 1000);
+        }
+        if (translationsResult.data) {
+          setTranslations(translationsResult.data);
+          // Cache for 7 days
+          setCache(CACHE_KEYS.BIBLE_TRANSLATIONS, translationsResult.data, 7 * 24 * 60 * 60 * 1000);
+        }
+      } catch {
+        showError('Failed to load Bible data. Please refresh the page.');
       }
       setBooksLoading(false);
     }
     fetchBibleData();
-  }, []);
+  }, [showError]);
 
   useEffect(() => {
     async function fetchPlansData() {
@@ -125,9 +151,44 @@ export default function BiblePage() {
   }, [selectedBook, selectedChapter, selectedTranslation]);
 
   const handleStartPlan = async (planId: string) => {
-    const result = await api.readingPlans.startPlan(planId);
-    if (result.data) {
-      setProgress([...progress, result.data]);
+    try {
+      const result = await api.readingPlans.startPlan(planId);
+      if (result.data) {
+        setProgress([...progress, result.data]);
+        success('Reading plan started! Check back daily to track your progress.');
+      } else if (result.error) {
+        showError('Failed to start plan. Please try again.');
+      }
+    } catch {
+      showError('Failed to start plan. Please try again.');
+    }
+  };
+
+  const handleCopyVerse = async (verse: BibleVerse) => {
+    const text = `"${verse.text}" - ${selectedBook?.name} ${selectedChapter}:${verse.verse} (${selectedTranslation})`;
+    try {
+      await navigator.clipboard.writeText(text);
+      success('Verse copied to clipboard');
+    } catch {
+      showError('Failed to copy verse');
+    }
+  };
+
+  const handleShareVerse = async (verse: BibleVerse) => {
+    const text = `"${verse.text}" - ${selectedBook?.name} ${selectedChapter}:${verse.verse} (${selectedTranslation})`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${selectedBook?.name} ${selectedChapter}:${verse.verse}`,
+          text,
+        });
+      } catch {
+        // User cancelled or share failed - fall back to copy
+        handleCopyVerse(verse);
+      }
+    } else {
+      // Fallback to clipboard
+      handleCopyVerse(verse);
     }
   };
 
@@ -230,8 +291,9 @@ export default function BiblePage() {
           {/* Verses */}
           <div className="bg-white rounded-2xl border border-gray-200 p-8">
             {versesLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+              <div className="flex items-center justify-center py-12" role="status" aria-label="Loading verses">
+                <Loader2 className="w-8 h-8 text-brand-500 animate-spin" aria-hidden="true" />
+                <span className="sr-only">Loading verses...</span>
               </div>
             ) : verses.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
@@ -240,10 +302,29 @@ export default function BiblePage() {
             ) : (
               <div className="prose prose-lg max-w-none">
                 {verses.map((verse) => (
-                  <p key={verse.id} className="mb-4 leading-relaxed">
-                    <sup className="text-brand-500 font-bold mr-1">{verse.verse}</sup>
-                    <span className="text-gray-800">{verse.text}</span>
-                  </p>
+                  <div key={verse.id} className="group relative mb-4">
+                    <p className="leading-relaxed pr-20">
+                      <sup className="text-brand-500 font-bold mr-1">{verse.verse}</sup>
+                      <span className="text-gray-800">{verse.text}</span>
+                    </p>
+                    {/* Copy/Share buttons - show on hover */}
+                    <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      <button
+                        onClick={() => handleCopyVerse(verse)}
+                        className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+                        aria-label={`Copy verse ${verse.verse}`}
+                      >
+                        <Copy className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                      <button
+                        onClick={() => handleShareVerse(verse)}
+                        className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+                        aria-label={`Share verse ${verse.verse}`}
+                      >
+                        <Share2 className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -318,8 +399,20 @@ export default function BiblePage() {
 
         {activeTab === 'books' ? (
           booksLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+            <div className="space-y-8" role="status" aria-label="Loading Bible books">
+              <div>
+                <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-4" />
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                  {[...Array(10)].map((_, i) => <BookButtonSkeleton key={i} />)}
+                </div>
+              </div>
+              <div>
+                <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-4" />
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                  {[...Array(10)].map((_, i) => <BookButtonSkeleton key={i} />)}
+                </div>
+              </div>
+              <span className="sr-only">Loading Bible books...</span>
             </div>
           ) : books.length === 0 ? (
             <div className="bg-white rounded-xl p-12 border border-gray-200 text-center">

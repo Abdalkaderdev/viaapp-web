@@ -78,12 +78,16 @@ function NavSection({
                 ? 'bg-brand-50 text-brand-700'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             )}
-            title={!sidebarOpen ? item.label : undefined}
+            aria-label={!sidebarOpen ? item.label : undefined}
+            aria-current={isActive ? 'page' : undefined}
           >
-            <item.icon className={clsx(
-              'w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110',
-              isActive && 'text-brand-600'
-            )} />
+            <item.icon
+              className={clsx(
+                'w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110',
+                isActive && 'text-brand-600'
+              )}
+              aria-hidden="true"
+            />
             {sidebarOpen && (
               <span className={clsx('font-medium truncate', isActive && 'text-brand-700')}>
                 {item.label}
@@ -231,9 +235,9 @@ export function Sidebar() {
           <button
             onClick={logout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all group"
-            title={!sidebarOpen ? 'Sign Out' : undefined}
+            aria-label={!sidebarOpen ? 'Sign Out' : undefined}
           >
-            <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" aria-hidden="true" />
             {sidebarOpen && <span className="font-medium">Sign Out</span>}
           </button>
         </div>

@@ -23,7 +23,9 @@ import {
   Sparkles,
   Loader2,
   Church,
+  AlertCircle,
 } from 'lucide-react';
+import { useToast } from '@/components/ui/toast';
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -269,6 +271,7 @@ interface RecentActivity {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { error: showError } = useToast();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [prayerCount, setPrayerCount] = useState(0);
@@ -278,6 +281,7 @@ export default function DashboardPage() {
   const [isChurchDay, setIsChurchDay] = useState(false);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [statsError, setStatsError] = useState<string | null>(null);
   const [dailyVerse, setDailyVerse] = useState<DailyVerse>({
     reference: 'Philippians 4:13',
     text: 'I can do all things through Christ who strengthens me.',
@@ -288,11 +292,13 @@ export default function DashboardPage() {
     setCheckingIn(true);
     try {
       const result = await api.church.checkIn(userChurch.id);
-      if (!result.error) {
+      if (result.error) {
+        showError('Failed to check in. Please try again.');
+      } else {
         setHasCheckedIn(true);
       }
     } catch {
-      // Handle error
+      showError('Failed to check in. Please try again.');
     }
     setCheckingIn(false);
   }
@@ -304,6 +310,9 @@ export default function DashboardPage() {
         const statsResult = await api.user.getStats();
         if (statsResult.data) {
           setStats(statsResult.data);
+          setStatsError(null);
+        } else if (statsResult.error) {
+          setStatsError('Unable to load your progress stats');
         }
 
         // Fetch user's church
@@ -326,10 +335,10 @@ export default function DashboardPage() {
             });
           }
         } catch {
-          // Using default daily verse
+          // Using default daily verse - this is acceptable fallback behavior
         }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
+      } catch {
+        setStatsError('Unable to load dashboard data. Please refresh the page.');
       }
 
       setLoading(false);
@@ -376,8 +385,8 @@ export default function DashboardPage() {
         // Sort by timestamp and take top 5
         activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         setRecentActivity(activities.slice(0, 5));
-      } catch (error) {
-        console.error('Failed to fetch activity data:', error);
+      } catch {
+        // Activity loading failed - show empty state instead of error
       }
       setActivityLoading(false);
     }
@@ -483,47 +492,54 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Progress</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {loading ? (
-            <>
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-            </>
-          ) : (
-            <>
-              <StatCard
-                icon={Clock}
-                label="This Month"
-                value={stats?.monthlyQuietTimeCount || 0}
-                color="bg-gradient-to-br from-brand-500 to-brand-600"
-                description="Quiet time sessions this month"
-              />
-              <StatCard
-                icon={Brain}
-                label="Verses Memorized"
-                value={stats?.totalVersesMemorized || 0}
-                color="bg-gradient-to-br from-purple-500 to-purple-600"
-                description="Total verses you've mastered"
-              />
-              <StatCard
-                icon={TrendingUp}
-                label="Total Sessions"
-                value={stats?.totalSessions || 0}
-                color="bg-gradient-to-br from-blue-500 to-blue-600"
-                description="All-time quiet time sessions"
-              />
-              <StatCard
-                icon={Heart}
-                label="Prayers"
-                value={prayerCount}
-                color="bg-gradient-to-br from-rose-500 to-pink-500"
-                description="Active prayer requests"
-              />
-            </>
-          )}
-        </div>
+        {statsError ? (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-8 flex items-center gap-3" role="alert">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" aria-hidden="true" />
+            <p className="text-red-700 text-sm">{statsError}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {loading ? (
+              <>
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+              </>
+            ) : (
+              <>
+                <StatCard
+                  icon={Clock}
+                  label="This Month"
+                  value={stats?.monthlyQuietTimeCount || 0}
+                  color="bg-gradient-to-br from-brand-500 to-brand-600"
+                  description="Quiet time sessions this month"
+                />
+                <StatCard
+                  icon={Brain}
+                  label="Verses Memorized"
+                  value={stats?.totalVersesMemorized || 0}
+                  color="bg-gradient-to-br from-purple-500 to-purple-600"
+                  description="Total verses you've mastered"
+                />
+                <StatCard
+                  icon={TrendingUp}
+                  label="Total Sessions"
+                  value={stats?.totalSessions || 0}
+                  color="bg-gradient-to-br from-blue-500 to-blue-600"
+                  description="All-time quiet time sessions"
+                />
+                <StatCard
+                  icon={Heart}
+                  label="Prayers"
+                  value={prayerCount}
+                  color="bg-gradient-to-br from-rose-500 to-pink-500"
+                  description="Active prayer requests"
+                />
+              </>
+            )}
+          </div>
+        )}
 
         {/* Quick Actions */}
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>

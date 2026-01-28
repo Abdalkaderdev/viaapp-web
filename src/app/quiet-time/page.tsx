@@ -20,7 +20,10 @@ import {
   Compass,
   PenLine,
   BookMarked,
+  AlertCircle,
 } from 'lucide-react';
+import { useToast } from '@/components/ui/toast';
+import { ReadingPlanSkeleton, ActivityItemSkeleton } from '@/components/ui/skeleton';
 
 type QuietTimeType = 'word_to_life' | 'word_to_heart' | 'guided' | 'custom';
 
@@ -46,11 +49,12 @@ function formatDuration(seconds: number): string {
 function QuietTimeContent() {
   const searchParams = useSearchParams();
   const justCompleted = searchParams.get('completed') === 'true';
+  const { success, error: showError } = useToast();
   const [selectedType, setSelectedType] = useState<QuietTimeType | null>(null);
   const [sessions, setSessions] = useState<QuietTimeSession[]>([]);
   const [readingPlans, setReadingPlans] = useState<ReadingPlan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showSuccess, setShowSuccess] = useState(justCompleted);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -65,35 +69,25 @@ function QuietTimeContent() {
         if (plansResult.data && Array.isArray(plansResult.data)) {
           setReadingPlans(plansResult.data);
         }
-      } catch (error) {
-        console.error('Failed to fetch quiet time data:', error);
+        setFetchError(null);
+      } catch {
+        setFetchError('Failed to load data. Please refresh the page.');
       }
       setLoading(false);
     }
     fetchData();
   }, []);
 
+  // Show success toast when coming back from completed session
   useEffect(() => {
-    if (showSuccess) {
-      const timer = setTimeout(() => setShowSuccess(false), 5000);
-      return () => clearTimeout(timer);
+    if (justCompleted) {
+      success('Session completed! Great job spending time with God today.');
     }
-  }, [showSuccess]);
+  }, [justCompleted, success]);
 
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto">
-        {/* Success Banner */}
-        {showSuccess && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <div>
-              <p className="font-medium text-green-900">Session completed!</p>
-              <p className="text-sm text-green-700">Great job spending time with God today.</p>
-            </div>
-          </div>
-        )}
-
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">QT Experiences</h1>
@@ -258,8 +252,16 @@ function QuietTimeContent() {
           </div>
 
           {loading ? (
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-              <Loader2 className="w-8 h-8 text-brand-500 animate-spin mx-auto" />
+            <div className="grid md:grid-cols-3 gap-4" role="status" aria-label="Loading reading plans">
+              <ReadingPlanSkeleton />
+              <ReadingPlanSkeleton />
+              <ReadingPlanSkeleton />
+              <span className="sr-only">Loading reading plans...</span>
+            </div>
+          ) : fetchError ? (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3" role="alert">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" aria-hidden="true" />
+              <p className="text-red-700 text-sm">{fetchError}</p>
             </div>
           ) : readingPlans.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
@@ -304,8 +306,11 @@ function QuietTimeContent() {
           <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Sessions</h2>
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
             {loading ? (
-              <div className="p-8 text-center">
-                <Loader2 className="w-8 h-8 text-brand-500 animate-spin mx-auto" />
+              <div className="divide-y divide-gray-100" role="status" aria-label="Loading recent sessions">
+                <ActivityItemSkeleton />
+                <ActivityItemSkeleton />
+                <ActivityItemSkeleton />
+                <span className="sr-only">Loading recent sessions...</span>
               </div>
             ) : sessions.length === 0 ? (
               <div className="p-8 text-center">
