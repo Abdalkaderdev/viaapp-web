@@ -34,15 +34,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Check if we have a token first
+      // Check if we have a token first (stored in sessionStorage, not localStorage)
       const token = typeof window !== 'undefined'
-        ? localStorage.getItem('viaapp.accessToken')
+        ? sessionStorage.getItem('viaapp.accessToken')
         : null;
 
       if (!token) {
         setUser(null);
-        // Redirect to login if no token and on protected route
-        router.replace('/login');
+        setLoading(false);
+        // Only redirect protected routes - allow public pages without auth
+        const publicPaths = ['/', '/features', '/about', '/faq', '/download', '/for-churches', '/login', '/register', '/terms', '/privacy'];
+        const currentPath = window.location.pathname;
+        const isPublicPath = publicPaths.some(p => currentPath === p || currentPath.startsWith('/login') || currentPath.startsWith('/register'));
+        if (!isPublicPath) {
+          router.replace('/login');
+        }
         return;
       }
 
