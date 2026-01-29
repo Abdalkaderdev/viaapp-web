@@ -306,10 +306,8 @@ export default function StudyDetailPage() {
   async function fetchStudy() {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // const result = await api.studies.getById(studyId);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setStudy(MOCK_STUDY);
+      const result = await api.studies.getById(studyId);
+      setStudy(result.data);
     } catch (error) {
       console.error('Failed to fetch study:', error);
     }
@@ -319,9 +317,7 @@ export default function StudyDetailPage() {
   async function handleEnroll() {
     setEnrolling(true);
     try {
-      // TODO: Replace with actual API call
-      // const result = await api.studies.enroll(studyId);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const result = await api.studies.enroll(studyId);
       setEnrollment({
         isEnrolled: true,
         progress: 0,

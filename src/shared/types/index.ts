@@ -139,6 +139,52 @@ export interface UserReadingProgress {
 }
 
 // Church types
+export interface Study {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  lessonCount: number;
+  estimatedMinutes: number;
+  enrolledCount: number;
+  rating: number;
+  imageUrl?: string;
+  author?: string;
+  authorBio?: string;
+  isFeatured?: boolean;
+  isNew?: boolean;
+  whatYouWillLearn?: string[];
+  requirements?: string[];
+  lessons: StudyLesson[];
+}
+
+export interface StudyLesson {
+  id: string;
+  title: string;
+  description: string;
+  durationMinutes: number;
+  order: number;
+  isCompleted: boolean;
+  isLocked: boolean;
+  type: 'video' | 'reading' | 'quiz' | 'reflection';
+}
+
+export interface EnrolledStudy {
+  id: string;
+  studyId: string;
+  progress: number;
+  study?: Study;
+}
+
+export interface UserStudyProgress {
+  id: string;
+  userId: string;
+  studyId: string;
+  lessonId: string;
+  completedAt: string;
+}
+
 export interface Church {
   id: string;
   name: string;

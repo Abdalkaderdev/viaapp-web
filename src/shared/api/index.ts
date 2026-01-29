@@ -320,6 +320,37 @@ export function createApiClient(config: ApiClientConfig) {
       },
     },
 
+
+
+
+    // Studies
+    studies: {
+      async getAll(): Promise<ApiResponse<Study[]>> {
+        return request<Study[]>('/studies');
+      },
+
+      async getById(id: string): Promise<ApiResponse<Study>> {
+        return request<Study>(`/studies/${id}`);
+      },
+
+      async getEnrolled(): Promise<ApiResponse<EnrolledStudy[]>> {
+        return request<EnrolledStudy[]>('/studies/enrolled');
+      },
+
+      async enroll(studyId: string): Promise<ApiResponse<UserStudyProgress>> {
+        return request<UserStudyProgress>(`/studies/${studyId}/enroll`, {
+          method: 'POST',
+        });
+      },
+
+      async updateProgress(studyId: string, lessonId: string, completed: boolean): Promise<ApiResponse<UserStudyProgress>> {
+        return request<UserStudyProgress>(`/studies/${studyId}/lessons/${lessonId}/progress`, {
+          method: 'POST',
+          body: JSON.stringify({ completed }),
+        });
+      },
+    },
+
     // Reading Plans
     readingPlans: {
       async getPlans(): Promise<ApiResponse<ReadingPlan[]>> {

@@ -252,18 +252,11 @@ export default function StudiesPage() {
   async function fetchStudies() {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call when endpoint is available
-      // const result = await api.studies.getAll();
-      // For now, using mock data
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
-      setStudies(MOCK_STUDIES);
+      const result = await api.studies.getAll();
+      setStudies(result.data || []);
 
-      // Fetch enrolled studies
-      // const enrolledResult = await api.studies.getEnrolled();
-      setEnrolledStudies([
-        { id: '1', studyId: '1', progress: 45 },
-        { id: '2', studyId: '5', progress: 20 },
-      ]);
+      const enrolledResult = await api.studies.getEnrolled();
+      setEnrolledStudies(enrolledResult.data || []);
     } catch (error) {
       console.error('Failed to fetch studies:', error);
     }
